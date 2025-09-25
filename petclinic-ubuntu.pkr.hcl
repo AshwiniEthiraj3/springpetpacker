@@ -23,7 +23,7 @@ variable "iam_instance_profile" {
 source "amazon-ebs" "ubuntu" {
   region               = "ap-south-1"
   instance_type        = "t3.micro"
-  iam_instance_profile = "packer-s3-read-profile"
+  iam_instance_profile = var.iam_instance_profile   # ✅ use variable here
 
   source_ami_filter {
     filters = {
@@ -57,8 +57,8 @@ build {
       # Create app directory
       "sudo mkdir -p /opt/petclinic",
 
-      # Pull latest JAR from S3
-      "aws s3 cp s3://springpetclinicjar1/petclinic-latest.jar /tmp/petclinic.jar",
+      # Pull latest JAR from S3 (✅ use variables instead of hardcoding)
+      "aws s3 cp s3://${var.bucket_name}/${var.object_key} /tmp/petclinic.jar",
       "sudo mv /tmp/petclinic.jar /opt/petclinic/petclinic.jar",
 
       # Systemd service
