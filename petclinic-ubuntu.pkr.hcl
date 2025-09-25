@@ -7,6 +7,18 @@ packer {
   }
 }
 
+variable "bucket_name" {
+  type = string
+}
+
+variable "object_key" {
+  type = string
+}
+
+variable "iam_instance_profile" {
+  type = string
+}
+
 # Start from Ubuntu base image
 source "amazon-ebs" "ubuntu" {
   region               = "ap-south-1"
