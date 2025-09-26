@@ -16,21 +16,21 @@ provisioner "shell" {
     "sudo mv /tmp/petclinic.jar /opt/petclinic/petclinic.jar",
     "sudo chown ubuntu:ubuntu /opt/petclinic/petclinic.jar",
 
-    # Inject DB config as environment variables (best practice)
-    \"echo 'SPRING_DATASOURCE_URL=jdbc:mysql://springpet-db.cbgoqoeyey8l.ap-south-1.rds.amazonaws.com:3306/petclinic' | sudo tee -a /etc/environment\",
-    \"echo 'SPRING_DATASOURCE_USERNAME=admin' | sudo tee -a /etc/environment\",
-    \"echo 'SPRING_DATASOURCE_PASSWORD=admin123' | sudo tee -a /etc/environment\",
-    \"echo 'SPRING_JPA_HIBERNATE_DDL_AUTO=update' | sudo tee -a /etc/environment\",
-    \"echo 'SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQL8Dialect' | sudo tee -a /etc/environment\",
+    # Inject DB config as env vars
+    "echo 'SPRING_DATASOURCE_URL=jdbc:mysql://springpet-db.cbgoqoeyey8l.ap-south-1.rds.amazonaws.com:3306/petclinic' | sudo tee -a /etc/environment",
+    "echo 'SPRING_DATASOURCE_USERNAME=admin' | sudo tee -a /etc/environment",
+    "echo 'SPRING_DATASOURCE_PASSWORD=admin123' | sudo tee -a /etc/environment",
+    "echo 'SPRING_JPA_HIBERNATE_DDL_AUTO=update' | sudo tee -a /etc/environment",
+    "echo 'SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQL8Dialect' | sudo tee -a /etc/environment",
 
-    # Systemd service (uses env vars + binds to all interfaces)
-    \"echo '[Unit]\nDescription=Spring PetClinic\nAfter=network.target\n\n[Service]\nEnvironmentFile=-/etc/environment\nExecStart=/usr/bin/java -jar /opt/petclinic/petclinic.jar --spring.profiles.active=mysql --server.address=0.0.0.0\nRestart=always\nUser=ubuntu\n\n[Install]\nWantedBy=multi-user.target' | sudo tee /etc/systemd/system/petclinic.service\",
+    # Create systemd service using heredoc (avoids multi-line string issues)
+    "sudo bash -c 'cat > /etc/systemd/system/petclinic.service <<EOF\n[Unit]\nDescription=Spring PetClinic\nAfter=network.target\n\n[Service]\nEnvironmentFile=-/etc/environment\nExecStart=/usr/bin/java -jar /opt/petclinic/petclinic.jar --spring.profiles.active=mysql --server.address=0.0.0.0\nRestart=always\nUser=ubuntu\n\n[Install]\nWantedBy=multi-user.target\nEOF'",
 
+    # Enable and start service
     "sudo systemctl daemon-reload",
     "sudo systemctl enable petclinic",
     "sudo systemctl start petclinic"
   ]
 }
-
 
  
